@@ -49,7 +49,8 @@ def _get_config(key: str, default: str = "") -> str:
 
 
 PROVIDER = _get_config("PROVIDER", "gemini")
-MODEL_NAME = _get_config("MODEL_NAME", "gemini-2.5-pro" if PROVIDER == "gemini" else "claude-sonnet-4-6")
+MODEL_NAME = st.secrets.get("MODEL_NAME", "gemini-3.1-pro-preview" if PROVIDER == "gemini" else "claude-sonnet-4-6")
+
 NABH_LEVEL = _get_config("NABH_LEVEL", "FULL")  # "FULL" or "ENTRY"
 SECRET_KEY_NAME = "GEMINI_API_KEY" if PROVIDER == "gemini" else "ANTHROPIC_API_KEY"
 API_KEY = _get_config(SECRET_KEY_NAME, "")
