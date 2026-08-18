@@ -33,11 +33,26 @@ PACKAGE_RATES = os.path.join(DATA_DIR, "haryana_package_rates.xlsx")
 
 DEFAULT_INSTRUCTION = "Process this new claim according to the Project Instructions."
 
-PROVIDER = st.secrets.get("PROVIDER", "gemini") if hasattr(st, "secrets") else "gemini"
-MODEL_NAME = st.secrets.get("MODEL_NAME", "gemini-2.5-pro" if PROVIDER == "gemini" else "claude-sonnet-4-6")
-NABH_LEVEL = st.secrets.get("NABH_LEVEL", "FULL")  # "FULL" or "ENTRY"
+
+def _get_config(key: str, default: str = "") -> str:
+    """Read a config value from Streamlit Secrets if available (Streamlit
+    Cloud), otherwise fall back to a plain environment variable (Railway,
+    Render, AWS, Docker, local shell export, etc.). Safe to call even when
+    no secrets.toml exists at all - that case previously raised
+    StreamlitSecretNotFoundError on non-Streamlit-Cloud hosts."""
+    try:
+        if key in st.secrets:
+            return st.secrets[key]
+    except Exception:
+        pass
+    return os.environ.get(key, default)
+
+
+PROVIDER = _get_config("PROVIDER", "gemini")
+MODEL_NAME = _get_config("MODEL_NAME", "gemini-2.5-pro" if PROVIDER == "gemini" else "claude-sonnet-4-6")
+NABH_LEVEL = _get_config("NABH_LEVEL", "FULL")  # "FULL" or "ENTRY"
 SECRET_KEY_NAME = "GEMINI_API_KEY" if PROVIDER == "gemini" else "ANTHROPIC_API_KEY"
-API_KEY = st.secrets.get(SECRET_KEY_NAME, "") if hasattr(st, "secrets") else ""
+API_KEY = _get_config(SECRET_KEY_NAME, "")
 
 st.set_page_config(page_title="Medical Claim Generator", page_icon="🏥", layout="centered")
 
